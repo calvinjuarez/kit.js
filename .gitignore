@@ -1,6 +1,9 @@
 # Ignore System Files
 .DS_Store
 
-# Ignore Development Files
+# Ignore Development Helper Files
 *.md.html
 *.map
+
+# Ignore Minified/Production Files
+*.min.js
