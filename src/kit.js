@@ -8,11 +8,14 @@
  */
 
 
-function Kit(options) { this.init(options) }
+var LPEngineKIT = function (options) { this.init(options) }
 
-Kit.prototype = {
+LPEngineKIT.prototype = {
 	
-	  constructor: Kit
+	  constructor: LPEngineKIT
 	
-	, init: function(options) { return this }
+	, init: function(options) {
+		this.options = options
+		return this
+	}
 }
