@@ -7,16 +7,19 @@
  * Copyright (c) 2015 Calvin Juárez
  */
 
-
-var LPEngineKIT = function (src, options) { this.init(src, options) }
-
-LPEngineKIT.prototype = {
+(function (window, undefined) {
+		
+	var LPEngineKIT = function (src, options) { this.init(src, options) }
 	
-	  constructor: LPEngineKIT
-	
-	, init: function(src, options) {
-		this.src = src
-		this.options = options
-		return this
+	LPEngineKIT.prototype = {
+		
+		  constructor: LPEngineKIT
+		
+		, init: function(src, options) {
+			this.src = src
+			this.options = options
+			return this
+		}
 	}
-}
+		
+})(window)
