@@ -66,7 +66,7 @@
 	function prepareSrc(src) {
 		if (!src) return false // replace with error
 		
-		if (src.indexOf('\n') >= 0) // no chance that src is a valid path
+		if (src.indexOf('\n') >= 0 || src.indexOf('\r') >= 0) // no chance that src is a valid path
 			return src
 		else {
 			var contents = ''
@@ -76,9 +76,11 @@
 					contents = response // or something
 				}
 				, function (error) {
-					var noFile = false
+					var noFile = true
 					
-					// decide whether the error was that the file doesn't exist, because then it may be that `src` was a single-line source, so we'll want to use that
+					// decide whether the error was that the file doesn't exist, because then it may be
+					// that `src` was a single-line source, so we'll want to use that otherwise, we'll
+					// maybe want to error properly. "This src sux, pick a better one."
 					
 					if (noFile)
 						contents = src
@@ -93,6 +95,7 @@
 	
 	function getFile(path) {
 		// this was pretty much copied from http://www.html5rocks.com/en/tutorials/es6/promises/
+		// it's mostly a placeholder for now, until I get to making it work
 		return new Promise(function (resolve, reject) {
 			var request = new XMLHttpRequest()
 			
@@ -119,5 +122,8 @@
 			request.send()
 		})
 	}
+	
+	// ghetto export
+	window.LPEngineKIT = LPEngineKIT
 	
 })(window)
