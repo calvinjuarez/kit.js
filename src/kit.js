@@ -20,8 +20,8 @@
 	var LPEngineKIT = function (src, options) {
 		
 		// set properties
-		this.options = prepareOptions(options)
-		this.src     = prepareSrc(src)
+		this.options = prepareOptions(this, (options || {}))
+		this.src     = prepareSrc(this, src)
 		this.path    = src !== this.src ? src : null  // save `src` to `this.path` if the original src is different to the prepared src
 		
 		// init
@@ -35,8 +35,13 @@
 		
 		  constructor: LPEngineKIT
 		
-		, init: function() {
+		, init: function () {
+			this.process()
 			return this
+		}
+		
+		, process: function () {
+			if (!this.src) {}
 		}
 	}
 	
@@ -45,7 +50,7 @@
 	
 	//! -- Utilities
 	
-	function prepareOptions(options) {
+	function prepareOptions(self, options) {
 		if (!options) return defaults // JIC, really.  Might should error instead.
 		
 		var option
@@ -63,37 +68,36 @@
 		return options
 	}
 	
-	function prepareSrc(src) {
-		if (!src) return false // replace with error
+	function prepareSrc(self, src) {
+		
+		if (!src) src = self.src
 		
 		if (src.indexOf('\n') >= 0 || src.indexOf('\r') >= 0) // no chance that src is a valid path
 			return src
 		else {
-			var contents = ''
-			
-			getFile(src).then(
-				  function (response) {
-					contents = response // or something
-				}
-				, function (error) {
-					var noFile = true
+			getFile(self, src).then( // this'll set self.src in it's own good time
+				function (response) {
+					self.src = response // or something
+				},
+				function (error) {
+					var noFile = false
 					
 					// decide whether the error was that the file doesn't exist, because then it may be
 					// that `src` was a single-line source, so we'll want to use that otherwise, we'll
 					// maybe want to error properly. "This src sux, pick a better one."
 					
 					if (noFile)
-						contents = src
+						self.src = src
 					else
 						console.error(error)
 				}
 			)
 			
-			return contents
+			return this.src
 		}
 	}
 	
-	function getFile(path) {
+	function getFile(self, path) {
 		// this was pretty much copied from http://www.html5rocks.com/en/tutorials/es6/promises/
 		// it's mostly a placeholder for now, until I get to making it work
 		return new Promise(function (resolve, reject) {
