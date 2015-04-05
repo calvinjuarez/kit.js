@@ -11,21 +11,29 @@
 (function (window, undefined) {
 	
 	var defaults = {
-		debug: false
+		  dev : false
+		, env : 'file' // 'file' || 'browser' // (planned) || 'node'
+	}
+	var expected = {
+		  env : ['file', 'browser']
 	}
 	
 	
 	//! Constructor
 	
 	var LPEngineKIT = function (src, options) {
+		if (options.dev || this.options.dev) console.log('New `LPEngineKIT` created.')
 		
-		// set properties
-		this.options = prepareOptions(this, (options || {}))
-		this.src     = prepareSrc(this, src)
-		this.path    = src !== this.src ? src : null  // save `src` to `this.path` if the original src is different to the prepared src
+		// process arguments
+		this.setOptions(options) // sets `this.options`
+		this.setSrc(src)         // sets `this.src`
 		
-		// init
-		return this.init()
+		// set (or set up) other properties
+		this.srcID  = null // `this.setSrc()` will set this property *if* it would be different to `this.src`
+		this.result = ''   // set by `process()` (private method)
+		
+		// 
+		
 	}
 	
 	
@@ -36,98 +44,184 @@
 		  constructor: LPEngineKIT
 		
 		, init: function () {
-			this.process()
 			return this
 		}
-		
-		, process: function () {
-			if (!this.src) {}
+	
+		, setOptions: function (options) {
+			if (options.dev || this.options.dev) console.log('> Begin `setOptions()`')
+			
+			// validate
+			if (!options || Object.prototype.toString.call(options) !== '[object Object]')
+				return (this.options = this.options || defaults) && true
+			
+			// execute
+			var option
+			
+			// -- cleanse options of useless properties
+			for (option in options)                                                                           // for each passed option,
+				if (Object.prototype.hasOwnProperty.call(options, option) && !defaults.hasOwnProperty(option)) //    if it exists in `options` but _not_ in `defaults`,
+					delete options[option]                                                                      //    dump it.
+			
+			// -- merge defaults into options, favoring options
+			for (option in defaults)                                                                          // for each available option,
+				if (defaults.hasOwnProperty(option) && !Object.prototype.hasOwnProperty.call(options, option)) //    if it exists in `defaults` but _not_ in `options`,
+					options[option] = defaults[option]                                                          //    let `options` have the default option.
+			
+			// -- set this.options
+			this.options = options
+			
+			// -- warn when specific options have unexpected values
+			// -- -- `options.env`
+			if (expected.env.indexOf(this.options.env) < 0)
+				console.warn('FYI: The `env` option wasn\'t one of the expected values ("' + expected.env.join('", "') + '").'
+					, '\n     The code will fall back on the "file" environment. If you intended to use'
+					, '\n     a different environment, double-check that the `env` option you specified'
+					, '\n     is spelled correctly.')
+			
+			if (this.options.dev) console.log('> End   `setOptions()`')
+			
+			// -- success
+			return true
 		}
+		
+		, getSrc: function () {
+			return this.src
+		}
+		
+		, setSrc: function (src) {
+			if (this.options.dev) console.log('> Begin `setSrc()`')
+			
+			// validate
+			// -- validate argument(s)
+			if (!src)
+				src = this.src || ''
+			
+			// -- avoid the file request if there's no chance `this.src` is a path
+			if (src.indexOf('\n') >= 0 && src.indexOf('\r') >= 0) // the presence of '\n' or '\r' means the `src` cannot be a valid path
+				// -- success
+				return (this.src = src) && true // we'll assume what was passed was a kit string, rather than a src id
+			
+			// execute
+			this.srcID = src // we save the previous `src` to `srcID`
+			
+			var err = null
+			
+			switch (this.options.env) { // —> `if ... else if` ?
+				
+				// -- in-browser use case, via textareas
+				case 'browser':
+					if (this.options.dev) console.log('> > `setSrc()` used "browser" case')
+					
+					// -- -- set this.src
+					this.src = getSrcFromElement(this.src)
+					
+					break
+				
+				// -- basic use case, where we compile actual files (also the default)
+				default:
+				case 'file':
+					if (this.options.dev && this.options.env !== 'file') console.log('> > `options.env` was invalid (somehow)')
+					if (this.options.dev) console.log('> > `setSrc()` used "file" case')
+					
+					var self = this
+					
+					getSrcFromFile(src).then( // this is a Promise; it'll set `this.src` in it's own good time
+						// resolve()
+						  function (response) {
+							if (self.options.dev) console.log('> > > Request `getSrcFromFile()` succeeded with the following response:\n\n' + response + '\n')
+							self.srcID = self.src 
+							self.src   = response
+							process.call(self)
+						}
+						// reject()
+						, function (error) {
+							if (self.options.dev) console.log('> > > Request `getSrcFromFile(' + self.src + ')` failed.')
+							
+							var noFile = true
+							
+							// decide whether the error was that the file doesn't exist, because then it may be
+							// that `src` was a single-line source, so we'll want to use that otherwise, we'll
+							// maybe want to error properly. "This src sux, pick a better one."
+							
+							if (noFile)
+								self.src = src
+							else
+								console.error(error)
+						}
+					)
+					
+					break
+				
+			}
+			
+			if (this.options.dev) console.log('> End   `setSrc()`')
+			
+			if (err !== null) // then there's an error
+				return console.error(err) && false // returning false to signify error
+			
+			// -- success
+			return true
+		}
+		
+		, getResult: function () {
+			if (!this.result)
+				process.call(this)
+			return this.result
+		}
+		
 	}
 	
 	
 	//! Private Methods
 	
+	//! -- Process
+	
+	function process() {
+		if (!this.src)
+			console.error('Sorry, there\'s no source, somehow.')
+		
+		var result = this.src
+		
+		// process src here
+		
+		this.result = result
+		
+	}
+	
 	//! -- Utilities
 	
-	function prepareOptions(self, options) {
-		if (!options) return defaults // JIC, really.  Might should error instead.
-		
-		var option
-		
-		// cleanse options of useless properties
-		for (option in options)                                                                           // for each passed option,
-			if (Object.prototype.hasOwnProperty.call(options, option) && !defaults.hasOwnProperty(option)) //    if it exists in `options` but _not_ in `defaults`,
-				delete options[option]                                                                      //    dump it.
-		
-		// merge defaults into options, favoring options
-		for (option in defaults)                                                                          // for each available option,
-			if (defaults.hasOwnProperty(option) && !Object.prototype.hasOwnProperty.call(options, option)) //    if it exists in `defaults` but _not_ in `options`,
-				options[option] = defaults[option]                                                          //    let `options` have the default option.
-		
-		return options
-	}
-	
-	function prepareSrc(self, src) {
-		
-		if (!src) src = self.src
-		
-		if (src.indexOf('\n') >= 0 || src.indexOf('\r') >= 0) // no chance that src is a valid path
-			return src
-		else {
-			getFile(self, src).then( // this'll set self.src in it's own good time
-				function (response) {
-					self.src = response // or something
-				},
-				function (error) {
-					var noFile = false
-					
-					// decide whether the error was that the file doesn't exist, because then it may be
-					// that `src` was a single-line source, so we'll want to use that otherwise, we'll
-					// maybe want to error properly. "This src sux, pick a better one."
-					
-					if (noFile)
-						self.src = src
-					else
-						console.error(error)
-				}
-			)
-			
-			return this.src
-		}
-	}
-	
-	function getFile(self, path) {
-		// this was pretty much copied from http://www.html5rocks.com/en/tutorials/es6/promises/
-		// it's mostly a placeholder for now, until I get to making it work
-		return new Promise(function (resolve, reject) {
+	function getSrcFromFile(path) {
+		return new Promise(function (resolve, reject) { // TODO: consider polyfilling Promise
 			var request = new XMLHttpRequest()
 			
 			request.open('GET', path)
 			
+			// handle a valid response (even if that's 404 or some other request error)
 			request.onload = function() {
-				// This is called even on 404 etc
-				// so check the status
-				if (request.status == 200)
-					// Resolve the promise with the response text
+				if (request.response) // resolve the promise with the response text
 					resolve(request.response)
-				else
-					// Otherwise reject with the status text
-					// which will hopefully be a meaningful error
-					reject(Error(request.statusText))
+				else // otherwise reject with the status text which will hopefully be a meaningful error
+					reject(request)
 			}
 			
-			// Handle network errors
+			// handle network errors
 			request.onerror = function() {
-				reject(Error("Network Error"))
+				reject(Error('Network Error'))
 			}
 			
-			// Make the request
+			// make the request
 			request.send()
 		})
 	}
 	
-	// ghetto export
+	function getSrcFromElement(id) {
+		this.srcID = id
+		this.src   = document.getElementById(id).innerHTML
+	}
+	
+	
+	//! Ghetto Export
+	
 	window.LPEngineKIT = LPEngineKIT
 	
 })(window)
