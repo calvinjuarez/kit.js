@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf8">
-<title>Basic Usage Test</title>
+<title>Browser Environment Test</title>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 <style type="text/css">
@@ -13,48 +13,42 @@
 
 <div class="container-fluid">
 	<div class="row">
-		<section class="col-sm-4 col-sm-offset-2">
-			<h2>Input</h2>
-			<div class="input-group">
-				<input id="input" type="text" class="form-control" value="external.kit" readonly>
-				<div class="input-group-btn">
-					<button id="submit" class="btn btn-primary"><i class="fa fa-check"></i> Go</button>
-				</div>
-			</div>
-		</section>
-		<section class="col-sm-4">
-			<h2>Source</h2>
-			<pre><output id="source"></output></pre>
-		</section>
+		<article class="col-sm-4 col-sm-offset-2">
+			<h2>Variables</h2>
+			<textarea id="variables.kit" class="form-control"><!-- $msg Hello world. --></textarea>
+		</article>
+		<article class="col-sm-4">
+			<h2>Index</h2>
+			<textarea id="index.kit" class="form-control"><!-- @import variables.kit -->
+<h2><!--$msg--></h2></textarea>
+		</article>
 		<section class="col-sm-8 col-sm-offset-2">
-			<h2>Output</h2>
-			<pre><output id="output"></output></pre>
+			<header>
+				<button id="submit" class="btn btn-primary  pull-right"><i class="fa fa-check"></i> Go</button>
+				<h2>Result</h2>
+			</header>
+			<pre><output id="result"></output></pre>
 		</section>
+	</div>
 </div>
 	
 <div id="scripts">
 <script type="text/javascript" src="../../src/kit.js"></script>
 <script type="text/javascript">
 	// the elements
-	var $input  = document.querySelector('#input')
+	var $index  = document.querySelector('#index\\.kit')
 	var $submit = document.querySelector('#submit')
-	var $source = document.querySelector('#source')
-	var $output = document.querySelector('#output')
+	var $result = document.querySelector('#result')
 	
 	// the kit object
-	var kit = new LPEngineKIT($input.value, { dev: true, env: 'browser' })
+	var kit = new LPEngineKIT($index, { dev: true, env: 'browser' })
 	
 	// onclicks
-	$input.onclick = HTMLInputElement.prototype.select
 	$submit.onclick = submit
 	
 	// functions
 	function submit() {
-		if (!kit.src)
-			$source.innerHTML = 'Whoops: The source is (as yet) undefined.'
-		
-		$source.innerHTML = kit.src.replace(/</g, '&lt;').replace(/>/g, '&gt;')
-		$output.innerHTML = kit.getResult()
+		$result.innerHTML = kit.getResult().replace(/</g, '&lt;').replace(/>/g, '&gt;')
 	}
 </script>
 </div>

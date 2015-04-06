@@ -31,8 +31,6 @@
 		// set (or set up) other properties
 		this.srcID  = null // `this.setSrc()` will set this property *if* it would be different to `this.src`
 		this.result = ''   // set by `process()` (private method)
-		this.events = {}   // an object for collecting custom events
-		this.handlers = []
 		
 		// init
 		this.init()
@@ -105,12 +103,13 @@
 				src = this.src || ''
 			
 			// -- avoid the file request if there's no chance `this.src` is a path
-			if (src.indexOf('\n') >= 0 && src.indexOf('\r') >= 0) // the presence of '\n' or '\r' means the `src` cannot be a valid path
+			if (typeof src === 'string' && src.indexOf('\n') >= 0 && src.indexOf('\r') >= 0) // the presence of '\n' or '\r' means the `src` cannot be a valid path
 				// -- success
 				return (this.src = src) && true // we'll assume what was passed was a kit string, rather than a src id
 			
 			// execute
-			this.srcID = src // we save the previous `src` to `srcID`
+			// -- set this.srcID
+			this.srcID = src // if we've got this far, `this.src` will be different to the `src` argument, so we save that argument to `this.srcID`
 			
 			var err = null
 			
@@ -121,7 +120,7 @@
 					if (this.options.dev) console.log('  > `setSrc()` used "browser" case')
 					
 					// -- -- set this.src
-					this.src = getSrcFromElement(this.src)
+					this.src = getSrcFromElement(this.srcID)
 					
 					break
 				
@@ -137,8 +136,7 @@
 						// resolve()
 						  function (response) {
 							if (self.options.dev) console.log('    > Request `getSrcFromFile()` succeeded with the following response:\n\n' + response + '\n')
-							self.srcID = self.src 
-							self.src   = response
+							self.src = response
 							process.call(self)
 						}
 						// reject()
@@ -183,18 +181,23 @@
 			return this.result
 		}
 		
-		// Event Handling
+		// Event Handling (named to emulate the DOM Element Event API)
+		//
+		// inspired by:
+		// - EventTarget Web API: https://developer.mozilla.org/en-US/docs/Web/API/EventTarget
+		// - Emitter: https://github.com/component/emitter/blob/master/index.js
+		// - jQuery: http://api.jquery.com/category/events/
 		
-		, on: function(event, handler) {
-			var self = this
-			
-			// add event to the list of events and handlers or something
-			
-			return { self: self, event: event, handler: handler }
+		, addEventListener: function(event, handler) { // named to emulate the DOM Element Event API
+			return !!event && !!handler
 		}
 		
-		, trigger: function(event) {
-			return event
+		, removeEventListener: function(event, handler) {
+			return !!event && !!handler
+		}
+		
+		, dispatchEvent: function(event) { // named to emulate the DOM Element Event API
+			return !!event
 		}
 		
 		/*
@@ -290,9 +293,17 @@
 		})
 	}
 	
-	function getSrcFromElement(id) {
-		this.srcID = id
-		this.src   = document.getElementById(id).innerHTML
+	function getSrcFromElement(id) { // `id` can be a string (id of an element on the page) or a DOM Node
+		var $el
+		
+		if (typeof id === 'string')
+			$el = document.getElementById(id)
+		else if (id.nodeName)
+			$el = id
+		else
+			console.error('In the browser environment, the `src` argument of an LPEngineKIT object must be a string or a DOM Node.')
+		
+		return $el.innerHTML
 	}
 	
 	
