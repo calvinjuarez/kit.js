@@ -47,15 +47,17 @@
 		
 		, init: function () {
 			// create custom events
-			this.events.init = new CustomEvent('init', { detail: null }) // see https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/CustomEvent
+			//this.events.init = new CustomEvent('init', { detail: null }) // see https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/CustomEvent
 			
 			// add event listeners
-			this.addEventListener('init', function () { console.log('Works!') })
+			//this.addEventListener('init', function () { console.log('Works!') })
 			
-			this.dispatchEvent(this.events.init)
+			//this.dispatchEvent(this.events.init)
 			
 			return this
 		}
+		
+		// Setters
 	
 		, setOptions: function (options) {
 			if (options.dev || this.options.dev) console.log('> Begin `setOptions()`')
@@ -92,10 +94,6 @@
 			
 			// -- success
 			return true
-		}
-		
-		, getSrc: function () {
-			return this.src
 		}
 		
 		, setSrc: function (src) {
@@ -171,6 +169,12 @@
 			
 			// -- success
 			return true
+		}
+		
+		// Getters
+		
+		, getSrc: function () {
+			return this.src
 		}
 		
 		, getResult: function () {
