@@ -14,7 +14,8 @@
 		  dev : false
 		, env : 'file' // 'file' || 'browser' // (planned) || 'node'
 		// Events
-		, onload : function () {}
+		, onready     : function () {}
+		, onprocessed : function () {}
 	}
 	var expected = {
 		  env : ['file', 'browser']
@@ -132,6 +133,8 @@
 					// -- -- set this.src
 					this.src = getSrcFromElement(this.srcID)
 					
+					this.onready()
+					
 					break
 				
 				// -- basic use case, where we compile actual files (also the default)
@@ -147,7 +150,10 @@
 						// resolve()
 						  function (response) {
 							if (self.options.dev) console.log('  > `setSrc()` (async)\n    > Request `getSrcFromFile()` succeeded with the following response:\n```\n' + response + '\n```')
+							
 							self.src = response
+							
+							self.onready()
 						}
 						// reject()
 						, function (error) {
@@ -186,17 +192,27 @@
 		}
 		
 		, getResult: function () {
-			process.call(this) // sets this.result
+			if (!this.result) process.call(this) // sets this.result
+			
 			return this.result
 		}
 		
 		// Events
 		
-		, onload: function () {
+		, onready: function () {
+			if (this.options.dev) console.log('> EVENT: `onready()`')
+			
 			process.call(this) // sets this.result
 			
-			if (this.options.onload && Object.prototype.toString.call(this.options.onload) === '[object Function]')
-				this.options.onload()
+			if (this.options.onready && Object.prototype.toString.call(this.options.onready) === '[object Function]')
+				this.options.onready()
+		}
+		
+		, onprocessed: function () {
+			if (this.options.dev) console.log('> EVENT: `onprocessed()`')
+			
+			if (this.options.onprocessed && Object.prototype.toString.call(this.options.onprocessed) === '[object Function]')
+				this.options.onprocessed()
 		}
 		
 		// Event Handling (named to emulate the DOM Element Event API)
@@ -205,18 +221,18 @@
 		// - EventTarget Web API: https://developer.mozilla.org/en-US/docs/Web/API/EventTarget
 		// - Emitter: https://github.com/component/emitter/blob/master/index.js
 		// - jQuery: http://api.jquery.com/category/events/
-		
-		, addEventListener: function(event, handler) { // named to emulate the DOM Element Event API
-			return !!event && !!handler
-		}
-		
-		, removeEventListener: function(event, handler) {
-			return !!event && !!handler
-		}
-		
-		, dispatchEvent: function(event) { // named to emulate the DOM Element Event API
-			return !!event
-		}
+		// 
+		// , addEventListener: function(event, handler) { // named to emulate the DOM Element Event API
+		// 	return !!event && !!handler
+		// }
+		// 
+		// , removeEventListener: function(event, handler) {
+		// 	return !!event && !!handler
+		// }
+		// 
+		// , dispatchEvent: function(event) { // named to emulate the DOM Element Event API
+		// 	return !!event
+		// }
 		
 		/*
 		var addEventListener=function(type, listener) {
@@ -282,6 +298,7 @@
 		// process src here
 		
 		this.result = result
+		this.onprocessed()
 	}
 	
 	//! -- Utilities
