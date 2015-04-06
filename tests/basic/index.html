@@ -13,7 +13,7 @@
 
 <div class="container-fluid">
 	<div class="row">
-		<section class="col-sm-4 col-sm-offset-2">
+		<section class="col-sm-3 col-sm-offset-2">
 			<h2>Input</h2>
 			<div class="input-group">
 				<input id="input" type="text" class="form-control" value="external.kit" readonly>
@@ -22,7 +22,7 @@
 				</div>
 			</div>
 		</section>
-		<section class="col-sm-4">
+		<section class="col-sm-5">
 			<h2>Source</h2>
 			<pre><output id="source"></output></pre>
 		</section>
@@ -44,6 +44,8 @@
 	
 	// the kit object
 	var kit = new LPEngineKIT($input.value, { dev: true, env: 'invalid environment' })
+	
+	if (kit.src && typeof kit.src === 'string') submit()
 	
 	// onclicks
 	$input.onclick = HTMLInputElement.prototype.select

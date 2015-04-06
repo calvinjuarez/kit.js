@@ -13,6 +13,8 @@
 	var defaults = {
 		  dev : false
 		, env : 'file' // 'file' || 'browser' // (planned) || 'node'
+		// Events
+		, onload : function () {}
 	}
 	var expected = {
 		  env : ['file', 'browser']
@@ -119,6 +121,14 @@
 				case 'browser':
 					if (this.options.dev) console.log('  > `setSrc()` used "browser" case')
 					
+					// -- 
+					if (typeof src === 'string')
+						this.srcID = src
+					else if (src.nodeName)
+						this.srcID = src.id
+					else
+						return console.error('In the browser environment, the `src` argument of an LPEngineKIT object must be a string or a DOM Node.') && false
+					
 					// -- -- set this.src
 					this.src = getSrcFromElement(this.srcID)
 					
@@ -132,12 +142,12 @@
 					
 					var self = this
 					
-					getSrcFromFile(src).then( // this is a Promise; it'll set `this.src` in it's own good time
+					// -- -- set this.src (eventually)
+					this.src = getSrcFromFile(this.srcID).then( // this returns a Promise; it'll set `this.src` in it's own good time
 						// resolve()
 						  function (response) {
-							if (self.options.dev) console.log('    > Request `getSrcFromFile()` succeeded with the following response:\n\n' + response + '\n')
+							if (self.options.dev) console.log('  > `setSrc()` (async)\n    > Request `getSrcFromFile()` succeeded with the following response:\n```\n' + response + '\n```')
 							self.src = response
-							process.call(self)
 						}
 						// reject()
 						, function (error) {
@@ -163,7 +173,7 @@
 			if (this.options.dev) console.log('> End   `setSrc()`')
 			
 			if (err !== null) // then there's an error
-				return console.error(err) && false // returning false to signify error
+				return console.error(err) && false // returning false to signify error programatically
 			
 			// -- success
 			return true
@@ -176,9 +186,17 @@
 		}
 		
 		, getResult: function () {
-			if (!this.result)
-				process.call(this)
+			process.call(this) // sets this.result
 			return this.result
+		}
+		
+		// Events
+		
+		, onload: function () {
+			process.call(this) // sets this.result
+			
+			if (this.options.onload && Object.prototype.toString.call(this.options.onload) === '[object Function]')
+				this.options.onload()
 		}
 		
 		// Event Handling (named to emulate the DOM Element Event API)
@@ -264,7 +282,6 @@
 		// process src here
 		
 		this.result = result
-		
 	}
 	
 	//! -- Utilities
@@ -293,17 +310,8 @@
 		})
 	}
 	
-	function getSrcFromElement(id) { // `id` can be a string (id of an element on the page) or a DOM Node
-		var $el
-		
-		if (typeof id === 'string')
-			$el = document.getElementById(id)
-		else if (id.nodeName)
-			$el = id
-		else
-			console.error('In the browser environment, the `src` argument of an LPEngineKIT object must be a string or a DOM Node.')
-		
-		return $el.innerHTML
+	function getSrcFromElement(id) {
+		return document.getElementById(id).innerHTML
 	}
 	
 	
