@@ -31,9 +31,11 @@
 		// set (or set up) other properties
 		this.srcID  = null // `this.setSrc()` will set this property *if* it would be different to `this.src`
 		this.result = ''   // set by `process()` (private method)
+		this.events = {}   // an object for collecting custom events
+		this.handlers = []
 		
-		// 
-		
+		// init
+		this.init()
 	}
 	
 	
@@ -44,6 +46,14 @@
 		  constructor: LPEngineKIT
 		
 		, init: function () {
+			// create custom events
+			this.events.init = new CustomEvent('init', { detail: null }) // see https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/CustomEvent
+			
+			// add event listeners
+			this.addEventListener('init', function () { console.log('Works!') })
+			
+			this.dispatchEvent(this.events.init)
+			
 			return this
 		}
 	
@@ -110,7 +120,7 @@
 				
 				// -- in-browser use case, via textareas
 				case 'browser':
-					if (this.options.dev) console.log('> > `setSrc()` used "browser" case')
+					if (this.options.dev) console.log('  > `setSrc()` used "browser" case')
 					
 					// -- -- set this.src
 					this.src = getSrcFromElement(this.src)
@@ -120,22 +130,22 @@
 				// -- basic use case, where we compile actual files (also the default)
 				default:
 				case 'file':
-					if (this.options.dev && this.options.env !== 'file') console.log('> > `options.env` was invalid (somehow)')
-					if (this.options.dev) console.log('> > `setSrc()` used "file" case')
+					if (this.options.dev && this.options.env !== 'file') console.log('  > `options.env` was invalid (somehow)')
+					if (this.options.dev) console.log('  > `setSrc()` used "file" case')
 					
 					var self = this
 					
 					getSrcFromFile(src).then( // this is a Promise; it'll set `this.src` in it's own good time
 						// resolve()
 						  function (response) {
-							if (self.options.dev) console.log('> > > Request `getSrcFromFile()` succeeded with the following response:\n\n' + response + '\n')
+							if (self.options.dev) console.log('    > Request `getSrcFromFile()` succeeded with the following response:\n\n' + response + '\n')
 							self.srcID = self.src 
 							self.src   = response
 							process.call(self)
 						}
 						// reject()
 						, function (error) {
-							if (self.options.dev) console.log('> > > Request `getSrcFromFile(' + self.src + ')` failed.')
+							if (self.options.dev) console.log('    > Request `getSrcFromFile(' + self.src + ')` failed.')
 							
 							var noFile = true
 							
@@ -169,6 +179,68 @@
 			return this.result
 		}
 		
+		// Event Handling
+		
+		, on: function(event, handler) {
+			var self = this
+			
+			// add event to the list of events and handlers or something
+			
+			return { self: self, event: event, handler: handler }
+		}
+		
+		, trigger: function(event) {
+			return event
+		}
+		
+		/*
+		var addEventListener=function(type, listener) {
+			var self=this;
+			var wrapper=function(e) {
+				e.target=e.srcElement;
+				e.currentTarget=self;
+				if (listener.handleEvent) {
+					listener.handleEvent(e);
+				} else {
+					listener.call(self,e);
+				}
+			};
+			if (type=="DOMContentLoaded") {
+				var wrapper2=function(e) {
+					if (document.readyState=="complete") {
+						wrapper(e);
+					}
+				};
+				document.attachEvent("onreadystatechange",wrapper2);
+				eventListeners.push({object:this,type:type,listener:listener,wrapper:wrapper2});
+				
+				if (document.readyState=="complete") {
+					var e=new Event();
+					e.srcElement=window;
+					wrapper2(e);
+				}
+			} else {
+				this.attachEvent("on"+type,wrapper);
+				eventListeners.push({object:this,type:type,listener:listener,wrapper:wrapper});
+			}
+		};
+		var removeEventListener=function(type, listener) {
+			var counter=0;
+			while (counter<eventListeners.length) {
+				var eventListener=eventListeners[counter];
+				if (eventListener.object==this && eventListener.type==type && eventListener.listener==listener) {
+					if (type=="DOMContentLoaded") {
+						this.detachEvent("onreadystatechange",eventListener.wrapper);
+					} else {
+						this.detachEvent("on"+type,eventListener.wrapper);
+					}
+					eventListeners.splice(counter, 1);
+					break;
+				}
+				++counter;
+			}
+		};
+		*/
 	}
 	
 	
