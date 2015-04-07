@@ -14,8 +14,8 @@
 		  dev : false
 		, env : 'file' // 'file' || 'browser' // (planned) || 'node'
 		// Events
-		, onready     : function () {}
-		, onprocessed : function () {}
+		, onready   : function () {}
+		, onsuccess : function () {}
 	}
 	var expected = {
 		  env : ['file', 'browser']
@@ -208,7 +208,7 @@
 			// process src here
 			
 			this.result = result
-			this.onprocessed()
+			this.onsuccess()
 		}
 		
 		// Events
@@ -222,11 +222,11 @@
 				this.options.onready.call(this)
 		}
 		
-		, onprocessed: function () {
-			if (this.options.dev) console.log('> EVENT: `onprocessed()`')
+		, onsuccess: function () {
+			if (this.options.dev) console.log('> EVENT: `onsuccess()`')
 			
-			if (Object.prototype.toString.call(this.options.onprocessed) === '[object Function]')
-				this.options.onprocessed.call(this)
+			if (Object.prototype.toString.call(this.options.onsuccess) === '[object Function]')
+				this.options.onsuccess.call(this)
 		}
 		
 		// Event Handling (named to emulate the DOM Element Event API)
