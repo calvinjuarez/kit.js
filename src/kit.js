@@ -247,6 +247,10 @@
 	
 	//! Private Methods
 	
+	function compileKit(src, vars, forbiddenImportFilePath) { // corresponds to `recursivelyCompileKitFileAtPath` method from the original
+		
+	}
+	
 	//! -- Utilities
 	
 	function getSrcFromFile(path) {
