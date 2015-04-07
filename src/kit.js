@@ -83,13 +83,8 @@
 			// -- set this.options
 			this.options = options
 			
-			// -- warn when specific options have unexpected values
-			// -- -- `options.env`
-			if (expected.env.indexOf(this.options.env) < 0)
-				console.warn('FYI: The `env` option wasn\'t one of the expected values ("' + expected.env.join('", "') + '").'
-					, '\n     The code will fall back on the "file" environment. If you intended to use'
-					, '\n     a different environment, double-check that the `env` option you specified'
-					, '\n     is spelled correctly.')
+			// -- warn when specific options have unexpected values, if dev is true
+			if (this.options.dev) checkOptions.call(this)
 			
 			if (this.options.dev) console.log('> End   `setOptions()`')
 			
@@ -280,6 +275,28 @@
 	
 	function getSrcFromElement(id) {
 		return document.getElementById(id).innerHTML
+	}
+	
+	//! -- Debug
+	
+	function checkOptions() {
+		if (!this.options)
+			return console.error('Options have not been successully set for this object.') && false
+		
+		// options.env
+		if (expected.env.indexOf(this.options.env) < 0)
+			console.warn('FYI: The `env` option wasn\'t one of the expected values ("' + expected.env.join('", "') + '").'
+				, '\n     The code will fall back on the "file" environment. If you intended to use'
+				, '\n     a different environment, double-check that the `env` option you specified'
+				, '\n     is spelled correctly.')
+		
+		// options.onready
+		if (Object.prototype.toString.call(this.options.onready) !== '[object Function]')
+			console.warn('The `onready` option needs to be a function.')
+		
+		// options.onsuccess
+		if (Object.prototype.toString.call(this.options.onsuccess) !== '[object Function]')
+			console.warn('The `onsuccess` option needs to be a function.')
 	}
 	
 	
