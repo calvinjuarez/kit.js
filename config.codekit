@@ -14,6 +14,15 @@
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
 		},
+	"\/README.md.html": {
+		"fileType": 8192,
+		"ignore": 1,
+		"ignoreWasSetByUser": 0,
+		"inputAbbreviatedPath": "\/README.md.html",
+		"outputAbbreviatedPath": "No Output Path",
+		"outputPathIsOutsideProject": 0,
+		"outputPathIsSetByUser": 0
+		},
 	"\/src\/kit.js": {
 		"fileType": 64,
 		"ignore": 0,
@@ -71,11 +80,31 @@
 		"outputAbbreviatedPath": "No Output Path",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
+		},
+	"\/tests\/compiler\/compiler.js": {
+		"fileType": 64,
+		"ignore": 1,
+		"ignoreWasSetByUser": 1,
+		"inputAbbreviatedPath": "\/tests\/compiler\/compiler.js",
+		"outputAbbreviatedPath": "\/tests\/compiler\/compiler.min.js",
+		"outputPathIsOutsideProject": 0,
+		"outputPathIsSetByUser": 0,
+		"outputStyle": 0,
+		"syntaxCheckerStyle": 1
+		},
+	"\/tests\/compiler\/index.html": {
+		"fileType": 8192,
+		"ignore": 0,
+		"ignoreWasSetByUser": 0,
+		"inputAbbreviatedPath": "\/tests\/compiler\/index.html",
+		"outputAbbreviatedPath": "No Output Path",
+		"outputPathIsOutsideProject": 0,
+		"outputPathIsSetByUser": 0
 		}
 	},
 "hooks": [
 	],
-"lastSavedByUser": "Calvin Juárez",
+"lastSavedByUser": "Calvin Juarez",
 "manualImportLinks": {
 	},
 "projectAttributes": {
@@ -278,10 +307,6 @@
 			"active": 1,
 			"flagValue": -1
 			},
-		"browserify": {
-			"active": 0,
-			"flagValue": -1
-			},
 		"camelcase": {
 			"active": 0,
 			"flagValue": -1
@@ -346,6 +371,10 @@
 			"active": 0,
 			"flagValue": -1
 			},
+		"gcl": {
+			"active": false,
+			"flagValue": -1
+			},
 		"globalstrict": {
 			"active": 0,
 			"flagValue": -1
@@ -359,10 +388,6 @@
 			"flagValue": 4
 			},
 		"iterator": {
-			"active": 0,
-			"flagValue": -1
-			},
-		"jasmine": {
 			"active": 0,
 			"flagValue": -1
 			},
@@ -409,10 +434,6 @@
 		"maxstatements": {
 			"active": 0,
 			"flagValue": 4
-			},
-		"mocha": {
-			"active": 0,
-			"flagValue": -1
 			},
 		"mootools": {
 			"active": 0,
@@ -466,6 +487,10 @@
 			"active": 0,
 			"flagValue": -1
 			},
+		"onevar": {
+			"active": false,
+			"flagValue": -1
+			},
 		"phantom": {
 			"active": 0,
 			"flagValue": -1
@@ -479,10 +504,6 @@
 			"flagValue": -1
 			},
 		"prototypejs": {
-			"active": 0,
-			"flagValue": -1
-			},
-		"qunit": {
 			"active": 0,
 			"flagValue": -1
 			},
@@ -506,8 +527,8 @@
 			"active": 0,
 			"flagValue": -1
 			},
-		"singleGroups": {
-			"active": 0,
+		"smarttabs": {
+			"active": true,
 			"flagValue": -1
 			},
 		"strict": {
@@ -522,6 +543,10 @@
 			"active": 0,
 			"flagValue": -1
 			},
+		"trailing": {
+			"active": true,
+			"flagValue": -1
+			},
 		"typed": {
 			"active": 0,
 			"flagValue": -1
@@ -532,6 +557,10 @@
 			},
 		"unused": {
 			"active": 1,
+			"flagValue": -1
+			},
+		"white": {
+			"active": false,
 			"flagValue": -1
 			},
 		"withstmt": {
