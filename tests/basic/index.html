@@ -43,9 +43,7 @@
 	var $result = document.querySelector('#result')
 	
 	// the kit object
-	var kit = new LPEngineKIT($input.value, { dev: true, env: 'invalid environment' })
-	
-	if (kit.src && typeof kit.src === 'string') submit()
+	var kit = new LPEngineKIT($input.value, { dev: true })
 	
 	// onclicks
 	$input.onclick = HTMLInputElement.prototype.select
@@ -53,9 +51,6 @@
 	
 	// functions
 	function submit() {
-		if (!kit.src)
-			$source.innerHTML = 'Whoops: The source is (as yet) undefined. Please try again.'
-		
 		$source.innerHTML = kit.src.replace(/</g, '&lt;').replace(/>/g, '&gt;')
 		$result.innerHTML = kit.getResult().replace(/</g, '&lt;').replace(/>/g, '&gt;')
 	}
