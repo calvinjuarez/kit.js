@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf8">
-<title>Basic Usage Test</title>
+<title>Compiler Development</title>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 <style type="text/css">
@@ -13,28 +13,28 @@
 
 <div class="container-fluid">
 	<div class="row">
-		<section class="col-sm-3 col-sm-offset-2">
-			<h2>Input</h2>
+		<section class="col-sm-8 col-sm-offset-2">
+			<h2>File Path</h2>
 			<div class="input-group">
-				<input id="input" type="text" class="form-control" value="external.kit" readonly>
+				<input id="input" type="text" class="form-control" value="test.kit" readonly>
 				<div class="input-group-btn">
 					<button id="submit" class="btn btn-primary"><i class="fa fa-check"></i> Go</button>
 				</div>
 			</div>
 		</section>
-		<section class="col-sm-5">
-			<h2>Source</h2>
+		<section class="col-sm-8 col-sm-offset-2">
+			<h2>File Contents</h2>
 			<pre><output id="source"></output></pre>
 		</section>
 		<section class="col-sm-8 col-sm-offset-2">
-			<h2>Result</h2>
+			<h2>Compiler Result</h2>
 			<pre><output id="result"></output></pre>
 		</section>
 	</div>
 </div>
 	
 <div id="scripts">
-<script type="text/javascript" src="../../src/kit.js"></script>
+<script type="text/javascript" src="compiler.js"></script>
 <script type="text/javascript">
 	// the elements
 	var $input  = document.querySelector('#input')
@@ -42,17 +42,39 @@
 	var $source = document.querySelector('#source')
 	var $result = document.querySelector('#result')
 	
-	// the kit object
-	var kit = new LPEngineKIT($input.value, { dev: true })
+	// get src
+	var src = ''
+	var srcPromise = getFile($input.value).then(
+		  function (response) {
+			src = response
+		}
+		, function (error) {
+			console.error('Request goofed.')
+		}
+	)
 	
-	// onclicks
-	$input.onclick = HTMLInputElement.prototype.select
-	$submit.onclick = submit
+	// submit
+	$submit.onclick = function () {
+		$source.innerHTML = src.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+		$result.innerHTML = compile(src).replace(/</g, '&lt;').replace(/>/g, '&gt;')
+	}
 	
-	// functions
-	function submit() {
-		$source.innerHTML = kit.src.replace(/</g, '&lt;').replace(/>/g, '&gt;')
-		$result.innerHTML = kit.getResult().replace(/</g, '&lt;').replace(/>/g, '&gt;')
+	// getFile
+	function getFile(path) {
+		return new Promise(function (resolve, reject) {
+			var request = new XMLHttpRequest()
+			request.open('GET', path)
+			request.onload = function() {
+				if (request.response)
+					resolve(request.response)
+				else
+					reject(request)
+			}
+			request.onerror = function() {
+				reject(Error('Network Error'))
+			}
+			request.send()
+		})
 	}
 </script>
 </div>
