@@ -192,9 +192,23 @@
 		}
 		
 		, getResult: function () {
-			if (!this.result) process.call(this) // sets this.result
+			if (!this.result) this.compile() // sets this.result
 			
 			return this.result
+		}
+		
+		// Compile
+		
+		, compile: function () {
+			if (!this.src)
+				console.error('Sorry, there\'s no source, somehow.')
+			
+			var result = this.src
+			
+			// process src here
+			
+			this.result = result
+			this.onprocessed()
 		}
 		
 		// Events
@@ -202,17 +216,17 @@
 		, onready: function () {
 			if (this.options.dev) console.log('> EVENT: `onready()`')
 			
-			process.call(this) // sets this.result
+			this.compile() // sets this.result
 			
-			if (this.options.onready && Object.prototype.toString.call(this.options.onready) === '[object Function]')
-				this.options.onready()
+			if (Object.prototype.toString.call(this.options.onready) === '[object Function]')
+				this.options.onready.call(this)
 		}
 		
 		, onprocessed: function () {
 			if (this.options.dev) console.log('> EVENT: `onprocessed()`')
 			
-			if (this.options.onprocessed && Object.prototype.toString.call(this.options.onprocessed) === '[object Function]')
-				this.options.onprocessed()
+			if (Object.prototype.toString.call(this.options.onprocessed) === '[object Function]')
+				this.options.onprocessed.call(this)
 		}
 		
 		// Event Handling (named to emulate the DOM Element Event API)
@@ -233,73 +247,10 @@
 		// , dispatchEvent: function(event) { // named to emulate the DOM Element Event API
 		// 	return !!event
 		// }
-		
-		/*
-		var addEventListener=function(type, listener) {
-			var self=this;
-			var wrapper=function(e) {
-				e.target=e.srcElement;
-				e.currentTarget=self;
-				if (listener.handleEvent) {
-					listener.handleEvent(e);
-				} else {
-					listener.call(self,e);
-				}
-			};
-			if (type=="DOMContentLoaded") {
-				var wrapper2=function(e) {
-					if (document.readyState=="complete") {
-						wrapper(e);
-					}
-				};
-				document.attachEvent("onreadystatechange",wrapper2);
-				eventListeners.push({object:this,type:type,listener:listener,wrapper:wrapper2});
-				
-				if (document.readyState=="complete") {
-					var e=new Event();
-					e.srcElement=window;
-					wrapper2(e);
-				}
-			} else {
-				this.attachEvent("on"+type,wrapper);
-				eventListeners.push({object:this,type:type,listener:listener,wrapper:wrapper});
-			}
-		};
-		var removeEventListener=function(type, listener) {
-			var counter=0;
-			while (counter<eventListeners.length) {
-				var eventListener=eventListeners[counter];
-				if (eventListener.object==this && eventListener.type==type && eventListener.listener==listener) {
-					if (type=="DOMContentLoaded") {
-						this.detachEvent("onreadystatechange",eventListener.wrapper);
-					} else {
-						this.detachEvent("on"+type,eventListener.wrapper);
-					}
-					eventListeners.splice(counter, 1);
-					break;
-				}
-				++counter;
-			}
-		};
-		*/
 	}
 	
 	
 	//! Private Methods
-	
-	//! -- Process
-	
-	function process() {
-		if (!this.src)
-			console.error('Sorry, there\'s no source, somehow.')
-		
-		var result = this.src
-		
-		// process src here
-		
-		this.result = result
-		this.onprocessed()
-	}
 	
 	//! -- Utilities
 	
