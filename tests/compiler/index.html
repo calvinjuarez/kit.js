@@ -70,7 +70,39 @@
 		$result.innerHTML = compile(file).compiledCode ? compile(file).compiledCode.replace(/</g, '&lt;').replace(/>/g, '&gt;') : compile(file).resultMessage
 	}
 	
-	// getFile
+	// get files
+	function getFiles(path) {
+		var files = {} // object of files in format { 'name': { path: '', content: '', error: false, files: ['name', 'name'] } }
+		var name = path.match(/([^\\\/]+$)/)[0].trim() // gets the string from after the last `/` or `\` 'til the end of the file, trimmed
+		
+		files[name] = { path: path, content: '', error: null }
+		
+		var master = getFile(path).then(
+			  function (res) {
+				files[path] = { content: res }
+				findFilePaths(files[path].content)
+			}
+			, function (err) {
+				files[path] = { content: '',  error: err }
+			}
+		)
+		
+		function findFilePaths(fileContent) {
+			var components = fileContent.match(/(<!--[\t \r\n]@import[\t \r\n=:].*-->)|(<!--[\t \r\n]@include[\t \r\n=:].*-->)/g)
+			for (var i = 0; i < components.length; i++) {
+				var component    = components[i]
+				var commentStart = component.indexOf('<!--')
+				var comment      = ''
+				
+				if (~commentStart) { // this component contains a comment
+					comment += component.substring(commentStart) // comment is the component from `<!--` on
+					if (/@import|@include/.test(comment)) { // presense of these indicates there is a new file to get
+						
+					}
+				}
+			}
+		}
+	}
 	function getFile(path) {
 		return new Promise(function (resolve, reject) {
 			var request = new XMLHttpRequest()
