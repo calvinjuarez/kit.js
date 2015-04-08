@@ -70,6 +70,7 @@
 				var currentFullCommentIndex = -1
 				var keywordStarted    = false
 				var predicateStarted  = false
+				var current, peek
 				
 				//
 				//  Test comp to see if it starts a special comment.
@@ -172,23 +173,23 @@
 				
 				console.log(fullCommentBuffer)
 				
-				for (var i = 0; i < fullCommentLength; i++) {
-					var current = fullCommentBuffer[i]
+				for (var i = 0; i < fullCommentLength; i++) { //! ln 390
+					current = fullCommentBuffer[i]
 					currentFullCommentIndex++
 					
 					if (/@|$/.test(current)) {
-						// Skip everything until we get to the first $ or @ character, which is the start of the keyword.
+						// Skip everything until we get to the first $ or @ character, which is the start of the keyword. //! ln 397
 						keywordStarted = true
 						keyword += current
 						continue
 					} else if (keywordStarted) {
-						if (/\t| |=|:/.test(current))
+						if (/[\t =:]/.test(current))
 							// If we hit a space, tab, equals sign or colon, stop
 							break
 						else if (current === '-')
 							// If this is a hyphen, decide if it's part of the keyword or the beginning of the --> delimiter
 							if (i + 2 < fullCommentLength) {
-                        var peek = fullCommentBuffer[i + 1] + fullCommentBuffer[i + 2]
+                        peek = fullCommentBuffer[i + 1] + fullCommentBuffer[i + 2]
                         if (peek === '->')
 									// if the next two characters are "->", the hyphen is part of the comment-end delimiter.
                         	break
@@ -208,14 +209,134 @@
 					}
 				}
 				
-				//  Now get the predicate (everything after the keyword) It may be nothing (e.g. <!--$useThisVar-->)
+				//  Now get the predicate (everything after the keyword) It may be nothing (e.g. <!--$useThisVar-->) //! ln 450
 				
-				for (i = currentFullCommentIndex; i < fullCommentLength; i++) {}
+				for (var j = currentFullCommentIndex; j < fullCommentLength; j++) { //! ln 456
+					current = fullCommentBuffer[j]
+					if (/[\t =:\n\r]/.test(current) && !predicateStarted)
+						// Skip all space, equals signs, tabs, colons, '\n' and '\r' until we find the first character that's NOT one of these.
+						// Note: don't do "isAlphanumeric" check because some predicates will be: "../someFile.kit" (with quotes)
+						continue
+					else if (current === '-') {
+						predicateStarted = true
+						
+						// If this is a hyphen, we need to see if it's part of the predicate, or part of the end-comment delimiter (-->)
+						// Do we have at least 2 slots left in the string?
+						if (j + 2 < fullCommentLength) {
+							peek = fullCommentBuffer[j + 1] + fullCommentBuffer[j + 2]
+							if (peek === '->') {
+								// if the next two characters are "->", we've reached the end of the predicate.
+								// if the LAST character we added to the predicate buffer was a space, delete it
+								if (predicate[predicate.length - 1] === ' ')
+									predicate = predicate.substring(0, predicate.length - 1 - 1)
+								
+								break
+							} else {
+								predicate += current
+								continue
+							}
+						} else {
+							// We don't have at least two slots left in the full comment. The comment is probably malformed, but we'll just roll with it.
+							predicate += current
+							continue
+						}
+					} else {
+						predicateStarted = true  //! ln 509
+						
+						// This character is a generic one, or a space, tab, colon or equals sign found after the start of the predicate.
+						predicate += current
+						continue
+					}
+				}
+				
+				// The predicate may not exist (e.g. <!--$useThisVar-->), so be careful
+				console.log(predicate)
+				
+				//
+				//  Now that we've got a keyword and predicate (maybe), do something with them
+				//
+				if (keyword)
+					if (/@import|@include/.test(keyword))
+						// We have an import statement
+						if (!predicate) {
+							errorEncountered = true
+							result.successful = false
+							result.resultMessage = 'Line ' + lineCount + ' of ' + fileName +
+								': Missing a filepath after the import/include keyword in this Kit comment: ' + specialCommentString
+							break
+						} else {
+							// We allow comma-separated import lists: <!-- @import someFile.kit, otherFile.html -->
+							var imports = predicate.split(',')
+							// Idk what to do about these two lines. They're pretty CodeKit-specific.
+							//NSFileManager *fm = [NSFileManager defaultManager]; //! ln 552
+							//NSArray *frameworkFolders = [_rootCompiler allPossibleFoldersForImportedFrameworkFiles]; //! ln 553
+							for (var k = 0; k < imports.length; k++) { //! ln 555
+								//var importString = imports[k]
+								//var fileFound = false
+								
+								// I'm actually just gonna deal with this bit later.  #asyncproblems
+							}
+							
+							if (errorEncountered) break // out of the overall "comps" loop. //! ln 667
+						}
+					else //! ln 670
+						// We have a variable
+						if (predicate)
+							// If we've got a predicate, we're assigning a value to this variable
+							variables[keyword] = predicate
+						else //! ln 678
+							if (variables[keyword]) //! ln 682
+								compiledCode += variables[keyword] //! ln 684
+							else {
+								errorEncountered = true
+								result.successful = false
+								result.resultMessage = 'Line ' + lineCount + ' of ' + fileName + ': The variable ' + keyword + ' is undefined.'
+								break
+							}
+				else { //! ln 696
+					// Keyword was nil, which is a massive error at this point.
+					errorEncountered = true
+					result.successful = false
+					result.resultMessage = 'Line ' + lineCount + ' of ' + fileName +
+						': Unable to find an appropriate keyword (either "@import"/"@include" or a variable name) in this Kit comment: ' +
+						specialCommentString
+					break
+				}
+				
+				//
+				//  It's possible (likely) that the special comment contained one or more newlines, which we need to account for.
+				//  Otherwise, next time we use it the lineCount will be missing the newlines in this special comment and will not indicate the correct line.
+				//
+				for (var l = 0; l < fullCommentLength; l++) { //! ln 711
+					current = fullCommentBuffer[l]
+					
+					if (current === '\n')
+						lineCount++ //! ln 717
+					else if (current === '\r')
+						// if this is a '\r', count it as a newline ONLY if the very next character is not a '\n'
+						if (l + 1 < fullCommentLength && fullCommentBuffer[l + 1] !== '\n')
+							lineCount++ //! ln 725
+				}
+				
+				//  If we had any text after the special comment's closing tag (e.g. "-->textHere"), add that:
+				if (specialCommentSuffix)
+					compiledCode += specialCommentSuffix
+				
+				//  Advance the 'currentComp' number to skip all components involved in the special comment we just handled.
+				//  This removes the special comment from the compiled output.
+				currentComp = specialCommentComp
 			}
 			
+			//
+			//  After handling all of the tokenized comps:
+			//
+			if (!errorEncountered) { //! ln 743
+				result.compiledCode = compiledCode
+				result.successful = true
+				result.resultMessage = 'Compiled successfully.'
+			}
 			
-			
-			
+			return result
 		}
 	}
 	
@@ -263,17 +384,6 @@
 			request.send()
 		})
 	}
-	
-/*
-	var srcPromise = getFile($input.value).then(
-		  function (response) {
-			src = response
-		}
-		, function (error) {
-			console.error('Request goofed.')
-		}
-	)
-*/
 	
 	window.compile = Compiler
 })(window)
