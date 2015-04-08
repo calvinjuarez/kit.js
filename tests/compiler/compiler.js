@@ -70,7 +70,7 @@
 				var currentFullCommentIndex = -1
 				var keywordStarted    = false
 				var predicateStarted  = false
-				var current, peek
+				var current, peek // used in the loops
 				
 				//
 				//  Test comp to see if it starts a special comment.
