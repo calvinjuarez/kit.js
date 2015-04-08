@@ -2,7 +2,7 @@
 
 	// The function below is meant to follow the method `recursivelyCompileKitFile...` from
 	// https://github.com/bdkjones/Kit/blob/master/LPEngineKIT.m (ln 146).  Line numbers will
-	// be indicated from time to time in reference to that file (as accessed in Spring 2015).
+	// be indicated from time to time in reference to that file (as accessed in April 2015).
 	
 	var Compiler = function (path, variables, previousFiles) { //! ln 146
 		var result = {}
@@ -33,6 +33,9 @@
 			
 			forbiddenImportPaths.push(fileName)
 			
+			//
+			//  Read the file and tokenize its contents
+			//
 			if (fileError || !inputCode || !getInputCode) { // handle file error
 				result.successful = false
 				result.resultMessage = 'This file does not exist or could not be opened for reading: ' + path
@@ -47,18 +50,30 @@
 				return result
 			}
 			
-			console.log(comps.join('|,|').replace(/\n/g,'\\n').split('|,|'))
+			//console.log(comps.join('|,|').replace(/\n/g,'\\n').split('|,|'))
 			
-			// Process the tokens (ln 226)
-			for (var currentComp = 0; currentComp < comps.length; currentComp++) {
-				var compString = comps[currentComp]
-				var commentStartIndex = compString.indexOf('<!--')
+			// Process the tokens
+			for (var currentComp = 0; currentComp < comps.length; currentComp++) { //! ln 226
+				var compString           = comps[currentComp]
+				var commentStartIndex    = compString.indexOf('<!--')
 				var specialCommentString = ''
 				var specialCommentPrefix = '' // Needed below in debug log statement. 
 				var specialCommentSuffix = '' // Needed at end if user does something like "<!--$var-->suffix"
 				var specialCommentComp   = 0  // Tracks the component that ends the special comment so we can advance to it at the end of this loop iteration, below
-				var isSpecialComment = false
+				var isSpecialComment     = false
 				
+				var keyword           = ''
+				var predicate         = ''
+				var fullCommentLength = 0
+				var fullCommentBuffer = ''
+				// Used below to record how far we've parsed the comment
+				var currentFullCommentIndex = -1
+				var keywordStarted    = false
+				var predicateStarted  = false
+				
+				//
+				//  Test comp to see if it starts a special comment.
+				//
 				if (commentStartIndex < 0) {
 					// This component is not the start of a comment, so just move it over to the compiled string
 					compiledCode += compString
@@ -99,9 +114,9 @@
 							if (testString.length > 1) {
 								var firstChar = testString[0]
 								
-								if ((/\t| /).test(firstChar))
+								if (/\t| /.test(firstChar))
 									continue
-								else if ((/@|$/).test(firstChar))
+								else if (/@|$/.test(firstChar))
 									isSpecialComment = /a-z/i.test(testString[1])
 								
 								break
@@ -117,7 +132,7 @@
 							lineCount++
 						
 						continue
-					} else //! ln 309
+					} else { //! ln 309
 						// We've got a special comment. String together all the comps from the current one to the next comp that contains the "-->" substring.
 						for (specialCommentComp = currentComp; specialCommentComp < comps.length; specialCommentComp++) {
 							var commentCompString = comps[specialCommentComp]
@@ -138,16 +153,68 @@
 								break
 							}
 						}
-					
+					}
 				}
 				
+				if (!specialCommentString) { //! ln 362
+					errorEncountered = true
+					result.successful = false
+					result.resultMessage = 'Line ' + lineCount + ' of ' + fileName +
+						': Found a Kit comment, but could not parse it into a full string. (Ensure that the file is UTF-8 encoded and not damaged.)'
+					break  // out of the overall loop that goes through tokens.
+				}
+				
+				//
+				//  Parse the special comment for keyword and predicate
+				//
+				fullCommentLength = specialCommentString.length
+				fullCommentBuffer = specialCommentString
+				
+				console.log(fullCommentBuffer)
+				
+				for (var i = 0; i < fullCommentLength; i++) {
+					var current = fullCommentBuffer[i]
+					currentFullCommentIndex++
+					
+					if (/@|$/.test(current)) {
+						// Skip everything until we get to the first $ or @ character, which is the start of the keyword.
+						keywordStarted = true
+						keyword += current
+						continue
+					} else if (keywordStarted) {
+						if (/\t| |=|:/.test(current))
+							// If we hit a space, tab, equals sign or colon, stop
+							break
+						else if (current === '-')
+							// If this is a hyphen, decide if it's part of the keyword or the beginning of the --> delimiter
+							if (i + 2 < fullCommentLength) {
+                        var peek = fullCommentBuffer[i + 1] + fullCommentBuffer[i + 2]
+                        if (peek === '->')
+									// if the next two characters are "->", the hyphen is part of the comment-end delimiter.
+                        	break
+                        else {
+									keyword += current
+									continue
+                        }
+							} else {
+								// We don't have at least two slots left in the full comment. The comment is probably malformed, but we'll just roll with it.
+								keyword += current
+								continue
+							}
+						else {
+							keyword += current
+							continue
+						}
+					}
+				}
+				
+				//  Now get the predicate (everything after the keyword) It may be nothing (e.g. <!--$useThisVar-->)
+				
+				for (i = currentFullCommentIndex; i < fullCommentLength; i++) {}
 			}
 			
-			//! ln 362
 			
 			
-			
-			console.log('end resume')
 			
 		}
 	}
@@ -169,7 +236,7 @@
 				// split between '>' and '<', in case <!-- $this sort of --><!-- $thing happens -->
 				(currentChar === '>' && i + 1 < str.length && inputStr[i + 1] === '<')      //! ln 825 – 835
 			
-			buffer += currentChar // we can skip the buffer conditionals, since our vars can be as big as we need. (ln 838 – 864)
+			buffer += currentChar // we can skip the buffer conditionals, since our vars can be as big as we need. //! ln 838 – 864
 			
 			if (shouldSplit || i + 1 === str.length) { //! ln 866 – 880
 				comps.push(buffer)
