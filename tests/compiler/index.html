@@ -44,16 +44,19 @@
 	
 	// the file
 	var file = {
-		  path: $input.value
-		, contents: ''
-		, error: false
+		  path     : $input.value
+		, contents : ''
+		, error    : false
 	}
+	
+	var files = {}
 	
 	// get the file
 	getFile($input.value).then(
 		  function (response) {
 			file.contents = response
 			$submit.onclick()
+			files = getFiles(file.path)
 		}
 		, function (error) {
 			file.error = true
