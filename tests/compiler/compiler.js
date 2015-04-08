@@ -4,14 +4,14 @@
 	// https://github.com/bdkjones/Kit/blob/master/LPEngineKIT.m (ln 146).  Line numbers will
 	// be indicated from time to time in reference to that file (as accessed in Spring 2015).
 	
-	var Compiler = function (path, variables, previousFiles) { // (ln 146)
+	var Compiler = function (path, variables, previousFiles) { //! ln 146
 		var result = {}
 		var fileName = path.split('/')[path.split('/').length - 1] // TODO: figure out fileName passing, for error reporting
 		
-		var forbiddenImportPaths = [] // (ln 166)
-		var fileError = false         // (ln 192)
-		var inputCode = ''            // (ln 193)
-		var comps     = []            // (ln 203)
+		var forbiddenImportPaths = [] //! ln 166
+		var fileError = false         //! ln 192
+		var inputCode = ''            //! ln 193
+		var comps     = []            //! ln 203
 		
 		var getInputCode = getFile(path).then(function (response) { inputCode = response; result = resume() }, function () { fileError = true })
 		
@@ -22,7 +22,7 @@
 		function resume() { // this is wrapped in a function to allow waiting for getting the initial file.
 			
 			// validate
-			variables = variables || {} // (ln 153)
+			variables = variables || {} //! ln 153
 			forbiddenImportPaths = previousFiles || []
 			
 			if (forbiddenImportPaths.indexOf(fileName) >= 0) { // handle looped importing
@@ -70,7 +70,7 @@
 					}
 					
 					continue // stop this iteration of the for loop
-				} else { // (ln 259)
+				} else { //! ln 259
 					// This string DOES contain "<!--", so we need to see if it's a special comment
 					
 					// First, if the location is NOT zero, then the user did something like "texthere<!-- comment -->"
@@ -90,7 +90,7 @@
 					}
 					// Test comments WITH spaces: <!-- @import someFile.html -->, <!-- $someVar = value-->, etc.
 					// Look at the first character in the NEXT comp that doesn't start with whitespace to overcome comments like this: <!--    $var=value -->
-					else { // (ln 283)
+					else { //! ln 283
 						var testComp = currentComp
 						while (testComp + 1 < comps.length) {
 							testComp++
@@ -109,7 +109,7 @@
 						}
 					}
 					
-					if (!isSpecialComment) { // (ln 309)
+					if (!isSpecialComment) { //! ln 309
 						compiledCode += compString
 						
 						// If this component has a newline, count it. Because of how we tokenize, the newline will ALWAYS be the final character in the component, if it exists.
@@ -117,7 +117,7 @@
 							lineCount++
 						
 						continue
-					} else // (ln 309)
+					} else //! ln 309
 						// We've got a special comment. String together all the comps from the current one to the next comp that contains the "-->" substring.
 						for (specialCommentComp = currentComp; specialCommentComp < comps.length; specialCommentComp++) {
 							var commentCompString = comps[specialCommentComp]
@@ -128,11 +128,11 @@
 							if (commentEndIndex >= 0) {
 								// Is there any text after the "-->" in this comp? (Other than a newline.)
 								// If so, we'll need to add that text to the compiled output once we handle this special comment, so save that text for later
-								if (commentEndIndex !== commentCompString.length - 3 && commentEndIndex + 3 < commentCompString.length) { // (ln 343 – 346)
+								if (commentEndIndex !== commentCompString.length - 3 && commentEndIndex + 3 < commentCompString.length) { //! ln 343 – 346
 									var possibleSuffix = commentCompString.substring(commentEndIndex + 3)
 									
 									if (!/\n\r|\n|\r/.test(possibleSuffix))
-										specialCommentSuffix = possibleSuffix // (ln 351)
+										specialCommentSuffix = possibleSuffix //! ln 351
 								}
 								
 								break
@@ -143,7 +143,7 @@
 				
 			}
 			
-			// (ln 362)
+			//! ln 362
 			
 			
 			
@@ -154,24 +154,24 @@
 	
 	// Helpers
 	
-	function tokenizeString(str) { // (ln 785)
+	function tokenizeString(str) { //! ln 785
 		var comps    = []
 		var inputStr = str
-		var buffer   = '' // (ln 794)
+		var buffer   = '' //! ln 794
 		
-		for (var i = 0; i < str.length; i++) { // (ln 804)
+		for (var i = 0; i < str.length; i++) { //! ln 804
 			var currentChar = inputStr[i]
 			var shouldSplit =
 				// always split on Space, Tab, and New Line (\n) characters
-				(currentChar === ' ' || currentChar === '\t' || currentChar === '\n')    || // (ln 810 – 814)
+				(currentChar === ' ' || currentChar === '\t' || currentChar === '\n')    || //! ln 810 – 814
 				// split on Return (\r) only if it's NOT immediately followed by a New Line
-				(currentChar === '\r' && i + 1 < str.length && inputStr[i + 1] !== '\n') || // (ln 815 – 824)
+				(currentChar === '\r' && i + 1 < str.length && inputStr[i + 1] !== '\n') || //! ln 815 – 824
 				// split between '>' and '<', in case <!-- $this sort of --><!-- $thing happens -->
-				(currentChar === '>' && i + 1 < str.length && inputStr[i + 1] === '<')      // (ln 825 – 835)
+				(currentChar === '>' && i + 1 < str.length && inputStr[i + 1] === '<')      //! ln 825 – 835
 			
 			buffer += currentChar // we can skip the buffer conditionals, since our vars can be as big as we need. (ln 838 – 864)
 			
-			if (shouldSplit || i + 1 === str.length) { // (ln 866 – 880)
+			if (shouldSplit || i + 1 === str.length) { //! ln 866 – 880
 				comps.push(buffer)
 				buffer = '' // gotta reset the buffer
 			}
