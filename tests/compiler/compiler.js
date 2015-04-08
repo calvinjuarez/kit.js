@@ -369,6 +369,7 @@
 			}
 		}
 		
+/*
 		// Testing Sean's Regex
 		
 		var compsArr = comps
@@ -397,6 +398,7 @@
 		console.log('Arrays are the same? ' + (compsArr.length === matchArr.length))
 		if (compsArr.length !== matchArr.length)
 			console.log('lengths:', compsArr.length, matchArr.length)
+*/
 		
 		return comps
 	}
