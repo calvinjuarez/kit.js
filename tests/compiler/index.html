@@ -42,21 +42,14 @@
 	var $source = document.querySelector('#source')
 	var $result = document.querySelector('#result')
 	
-	// get src
-	var src = ''
-	var srcPromise = getFile($input.value).then(
-		  function (response) {
-			src = response
-		}
-		, function (error) {
-			console.error('Request goofed.')
-		}
-	)
+	var src, getsrc = getFile($input.value).then(function (response) { src = response }, function (error) { src = error })
+	var result = compile($input.value)
 	
 	// submit
 	$submit.onclick = function () {
+		console.log(src)
 		$source.innerHTML = src.replace(/</g, '&lt;').replace(/>/g, '&gt;')
-		$result.innerHTML = compile(src).replace(/</g, '&lt;').replace(/>/g, '&gt;')
+		$result.innerHTML = result.resultMessage.replace(/</g, '&lt;').replace(/>/g, '&gt;')
 	}
 	
 	// getFile
@@ -68,7 +61,7 @@
 				if (request.response)
 					resolve(request.response)
 				else
-					reject(request)
+					reject('Request goofed.')
 			}
 			request.onerror = function() {
 				reject(Error('Network Error'))
