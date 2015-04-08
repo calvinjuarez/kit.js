@@ -5,7 +5,7 @@
 	// be indicated from time to time in reference to that file (as accessed in April 2015).
 	
 	var Compiler = function (file, variables, previousFiles) { //! ln 146
-		// file needs to be an object in format { name: 'path/or/whatever', contents: '...' }
+		// file needs to be an object in format { path: 'path/or/whatever', contents: '...', error: false }
 		
 		var result   = {}
 		var fileName = '' // TODO: figure out fileName passing, for error reporting
@@ -153,7 +153,7 @@
 								if (commentEndIndex !== commentCompString.length - 3 && commentEndIndex + 3 < commentCompString.length) { //! ln 343 – 346
 									var possibleSuffix = commentCompString.substring(commentEndIndex + 3)
 									
-									if (!/\n\r|\n|\r/.test(possibleSuffix))
+									if (!/\r\n|\r|\n/.test(possibleSuffix))
 										specialCommentSuffix = possibleSuffix //! ln 351
 								}
 								
@@ -176,8 +176,6 @@
 				//
 				fullCommentLength = specialCommentString.length
 				fullCommentBuffer = specialCommentString
-				
-				console.log(fullCommentBuffer)
 				
 				for (var i = 0; i < fullCommentLength; i++) { //! ln 390
 					current = fullCommentBuffer[i]
@@ -219,7 +217,7 @@
 				
 				for (var j = currentFullCommentIndex; j < fullCommentLength; j++) { //! ln 456
 					current = fullCommentBuffer[j]
-					if (/[\t =:\n\r]/.test(current) && !predicateStarted)
+					if (/[\t \r\n=:]/.test(current) && !predicateStarted)
 						// Skip all space, equals signs, tabs, colons, '\n' and '\r' until we find the first character that's NOT one of these.
 						// Note: don't do "isAlphanumeric" check because some predicates will be: "../someFile.kit" (with quotes)
 						continue
@@ -256,7 +254,6 @@
 				}
 				
 				// The predicate may not exist (e.g. <!--$useThisVar-->), so be careful
-				console.log(predicate)
 				
 				//
 				//  Now that we've got a keyword and predicate (maybe), do something with them
@@ -356,13 +353,13 @@
 		
 		for (var i = 0; i < str.length; i++) { //! ln 804
 			var currentChar = inputStr[i]
+			var peekChar    = inputStr[i + 1]
 			var shouldSplit =
-				// always split on Space, Tab, and New Line (\n) characters
-				(currentChar === ' ' || currentChar === '\t' || currentChar === '\n')    || //! ln 810 – 814
+				(currentChar === ' ' || currentChar === '\t' || currentChar === '\n')      || //! ln 810 – 814
 				// split on Return (\r) only if it's NOT immediately followed by a New Line
-				(currentChar === '\r' && i + 1 < str.length && inputStr[i + 1] !== '\n') || //! ln 815 – 824
+				(currentChar === '\r' && (i + 1) < str.length && inputStr[i + 1] !== '\n') || //! ln 815 – 824
 				// split between '>' and '<', in case <!-- $this sort of --><!-- $thing happens -->
-				(currentChar === '>' && i + 1 < str.length && inputStr[i + 1] === '<')      //! ln 825 – 835
+				(currentChar === '>' && (i + 1) < str.length && inputStr[i + 1] === '<')      //! ln 825 – 835
 			
 			buffer += currentChar // we can skip the buffer conditionals, since our vars can be as big as we need. //! ln 838 – 864
 			
