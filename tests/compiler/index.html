@@ -42,13 +42,29 @@
 	var $source = document.querySelector('#source')
 	var $result = document.querySelector('#result')
 	
-	var src, getsrc = getFile($input.value).then(function (response) { src = response }, function (error) { src = error })
-	var result = compile($input.value)
+	// the file
+	var file = {
+		  path: $input.value
+		, contents: ''
+		, error: false
+	}
+	
+	// get the file
+	getFile($input.value).then(
+		  function (response) {
+			file.contents = response
+			$submit.onclick()
+		}
+		, function (error) {
+			file.error = true
+			file.contents = error
+		}
+	)
 	
 	// submit
 	$submit.onclick = function () {
-		$source.innerHTML = src.replace(/</g, '&lt;').replace(/>/g, '&gt;')
-		//$result.innerHTML = result.resultMessage.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+		$source.innerHTML = file.contents.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+		$result.innerHTML = compile(file).compiledCode ? compile(file).compiledCode.replace(/</g, '&lt;').replace(/>/g, '&gt;') : compile(file).resultMessage
 	}
 	
 	// getFile

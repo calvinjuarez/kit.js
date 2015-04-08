@@ -4,22 +4,28 @@
 	// https://github.com/bdkjones/Kit/blob/master/LPEngineKIT.m (ln 146).  Line numbers will
 	// be indicated from time to time in reference to that file (as accessed in April 2015).
 	
-	var Compiler = function (path, variables, previousFiles) { //! ln 146
-		var result = {}
-		var fileName = path.split('/')[path.split('/').length - 1] // TODO: figure out fileName passing, for error reporting
+	var Compiler = function (file, variables, previousFiles) { //! ln 146
+		// file needs to be an object in format { name: 'path/or/whatever', contents: '...' }
+		
+		var result   = {}
+		var fileName = '' // TODO: figure out fileName passing, for error reporting
 		
 		var forbiddenImportPaths = [] //! ln 166
 		var fileError = false         //! ln 192
 		var inputCode = ''            //! ln 193
 		var comps     = []            //! ln 203
 		
-		var getInputCode = getFile(path).then(function (response) { inputCode = response; result = resume() }, function () { fileError = true })
+		if (file.path && file.contents) {
+			var pathParts = file.path.split('/')
+			fileName = pathParts[pathParts.length - 1]
+			inputCode = file.contents
+		}
 		
-		var compiledCode = ''
+		var compiledCode     = ''
 		var errorEncountered = false
-		var lineCount = 1
+		var lineCount        = 1
 		
-		function resume() { // this is wrapped in a function to allow waiting for getting the initial file.
+		//function resume() { // this is wrapped in a function to allow waiting for getting the initial file.
 			
 			// validate
 			variables = variables || {} //! ln 153
@@ -36,9 +42,9 @@
 			//
 			//  Read the file and tokenize its contents
 			//
-			if (fileError || !inputCode || !getInputCode) { // handle file error
+			if (fileError || !inputCode) { // handle file error
 				result.successful = false
-				result.resultMessage = 'This file does not exist or could not be opened for reading: ' + path
+				result.resultMessage = 'This file does not exist or could not be opened for reading: ' + file.path
 				return result
 			}
 			
@@ -337,7 +343,8 @@
 			}
 			
 			return result
-		}
+			
+		//}
 	}
 	
 	// Helpers
