@@ -369,6 +369,35 @@
 			}
 		}
 		
+		// Testing Sean's Regex
+		
+		var compsArr = comps
+			.join('§')
+			.replace(/\r/g,'⏎')
+			.replace(/\n/g,'¶')
+			.replace(/\t/g,'⇥')
+			.replace(/\s/g,'·')
+			.split('§')
+		
+		var matchArr = inputStr.match(/(>(?!<)|[^\s>])*(\r\n|\s|>(?=<)|$)/g)
+			.join('§')
+			.replace(/\r/g,'⏎')
+			.replace(/\n/g,'¶')
+			.replace(/\t/g,'⇥')
+			.replace(/\s/g,'·')
+			.split('§')
+		
+		var matchLast = matchArr.pop()
+		if (matchLast.length > 0) matchArr.push(matchLast)
+		
+		for (var j = 0; j < compsArr.length; j++) {
+			console.log('Same? ' + (compsArr[j] == matchArr[j]))
+			console.log('\tcomps: "' + compsArr[j] + '"\n\tmatch: "' + matchArr[j] + '"')
+		}
+		console.log('Arrays are the same? ' + (compsArr.length === matchArr.length))
+		if (compsArr.length !== matchArr.length)
+			console.log('lengths:', compsArr.length, matchArr.length)
+		
 		return comps
 	}
 	
