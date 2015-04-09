@@ -113,6 +113,51 @@
 		"outputStyle": 0,
 		"syntaxCheckerStyle": 1
 		},
+	"\/tests\/compiler\/include\/chain.kit": {
+		"fileType": 2048,
+		"ignore": 0,
+		"ignoreWasSetByUser": 0,
+		"inputAbbreviatedPath": "\/tests\/compiler\/include\/chain.kit",
+		"outputAbbreviatedPath": "\/tests\/compiler\/include\/chain.html",
+		"outputPathIsOutsideProject": 0,
+		"outputPathIsSetByUser": 0
+		},
+	"\/tests\/compiler\/include\/chain1.html": {
+		"fileType": 8192,
+		"ignore": 1,
+		"ignoreWasSetByUser": 0,
+		"inputAbbreviatedPath": "\/tests\/compiler\/include\/chain1.html",
+		"outputAbbreviatedPath": "No Output Path",
+		"outputPathIsOutsideProject": 0,
+		"outputPathIsSetByUser": 0
+		},
+	"\/tests\/compiler\/include\/chain1.kit": {
+		"fileType": 2048,
+		"ignore": 1,
+		"ignoreWasSetByUser": 0,
+		"inputAbbreviatedPath": "\/tests\/compiler\/include\/chain1.kit",
+		"outputAbbreviatedPath": "\/tests\/compiler\/include\/chain1.html",
+		"outputPathIsOutsideProject": 0,
+		"outputPathIsSetByUser": 0
+		},
+	"\/tests\/compiler\/include\/chain2.html": {
+		"fileType": 8192,
+		"ignore": 1,
+		"ignoreWasSetByUser": 0,
+		"inputAbbreviatedPath": "\/tests\/compiler\/include\/chain2.html",
+		"outputAbbreviatedPath": "No Output Path",
+		"outputPathIsOutsideProject": 0,
+		"outputPathIsSetByUser": 0
+		},
+	"\/tests\/compiler\/include\/chain2.kit": {
+		"fileType": 2048,
+		"ignore": 1,
+		"ignoreWasSetByUser": 0,
+		"inputAbbreviatedPath": "\/tests\/compiler\/include\/chain2.kit",
+		"outputAbbreviatedPath": "\/tests\/compiler\/include\/chain2.html",
+		"outputPathIsOutsideProject": 0,
+		"outputPathIsSetByUser": 0
+		},
 	"\/tests\/compiler\/index.html": {
 		"fileType": 8192,
 		"ignore": 0,
