@@ -7,12 +7,17 @@
 <title><!-- $title --></title>
 </head>
 <body>
-<!--normal comment right up next to--><!--@string-->
-before<!--@string-->
-<!--@string-->after
-<!-- @string -->
-prefix<!-- @include = partial.kit -->suffix
-<!-- @include:include/chain.kit -->
+
+<div>
+	<!--normal comment right up next to--><!--@string-->
+	before<!--@string-->
+	<!--@string-->after
+	<!-- @string -->
+</div>
+
+prefix<!-- @include partial.kit -->suffix
+<!-- @import include/chain.kit -->
 <!--\r--><!--\r\n-->
+
 </body>
 </html>
