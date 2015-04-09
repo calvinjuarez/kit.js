@@ -60,7 +60,6 @@
 			file.content = error
 		}
 	)
-	//var getAllFiles = getFiles($input.value, files)
 	
 	
 	// submit
@@ -91,49 +90,63 @@
 	// separate get files way of doing it (using some of the same stuff
 	//
 	var files = {}
+	var promises = {}
+	var getAllFiles = getFiles($input.value, files, promises)
 	
 	// get files
-/*
-	function getFiles(path, files) {
+	function getFiles(path, files, promises) {
 		
-		var File = function (file) {
-			this.content = file && file.content || ''
-			this.error   = file && file.error || null
+		// MicroConstructor (TM) for File object
+		var File = function (properties) {
+			this.content = properties && properties.content || ''
+			this.error   = properties && properties.error   || null
 		}
 		
 		if (!files) files = {} // object of files in format { 'path': { content: '', error: false } }
+		if (!promises) promises = {}
 		//var name = path.match(/([^\\\/]+$)/)[0].trim() // gets the string from after the last `/` or `\` 'til the end of the file, trimmed
 		
-		files[path] = new File() // add the main file to files
-		
-		var master = getFile(path).then(
-			  function (res) {
-				files[path] = { content: res }
-				findFilePaths(files[path].content, files)
+		files[path] = new File()
+		promises[path] = getFile(path).then(
+			  function (response) {
+				files[path].content = response
+				findFilePaths(response, files, promises)
 			}
-			, function (err) {
-				files[path] = { content: '',  error: err }
-				console.error(err)
+			, function (error) {
+				files[path].error = error
+				console.error(error)
 			}
 		)
 		
-		function findFilePaths(fileContent, files) {
+		return true
+		
+		function findFilePaths(fileContent, files, promises) {
 			var includes = fileContent.match(/(<!--[\t \r\n]@import[\t \r\n=:].*-->)|(<!--[\t \r\n]@include[\t \r\n=:].*-->)/g)
 			for (var i = 0; i < includes.length; i++) {
 				var paths = includes[i]
-					.split(/@import|@include/g).pop() // gets everything after the @import or @include
-						.replace(/-->/g,'').trim()     // strips '-->' (which is the end, since we're just grabbing the comment itself
-						.split(',')                    // splits the remaining string into an array of filenamse
+					.split(/@import[\t \r\n=:]*|@include[\t \r\n=:]*/g).pop() // gets everything after the @import or @include
+						.replace(/-->/g,'').trim()                             // strips '-->' (which is the end, since we're just grabbing the comment itself
+						.split(',')                                            // splits the remaining string into an array of filenamse
 				
-				for (var j = 0; j < paths.length; j++) {
-					files[paths[j]] = { content: '', error: null }
-				}
-				
-				console.log(paths)
+				for (var j = 0; j < paths.length; j++)
+					if (paths[j]) {
+						var path = paths[j]
+						files[path] = new File()
+						promises[path] = getFile(path).then(
+							  function (response) {
+								files[path].content = response
+								findFilePaths(response, files, promises)
+							}
+							, function (error) {
+								files[path].error = error
+								console.error(error)
+							}
+						)
+					}
 			}
+			
 		}
 	}
-*/
 </script>
 </div>
 
