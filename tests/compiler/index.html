@@ -121,7 +121,7 @@
 		return true
 		
 		function findFilePaths(fileContent, files, promises) {
-			var includes = fileContent.match(/(<!--[\t \r\n]@import[\t \r\n=:].*-->)|(<!--[\t \r\n]@include[\t \r\n=:].*-->)/g)
+			var includes = fileContent.match(/(<!--[\t \r\n]@import[\t ].*-->)|(<!--[\t \r\n]@include[\t ].*-->)/g)
 			for (var i = 0; i < includes.length; i++) {
 				var paths = includes[i]
 					.split(/@import[\t \r\n=:]*|@include[\t \r\n=:]*/g).pop() // gets everything after the @import or @include
