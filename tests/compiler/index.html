@@ -49,20 +49,19 @@
 		, error   : false
 	}
 	
-	var files = {}
-	
 	// get the file
-	getFile($input.value).then(
+	var getInputFile = getFile($input.value).then(
 		  function (response) {
 			file.content = response
 			$submit.onclick()
-			files = getFiles(file.path)
 		}
 		, function (error) {
 			file.error = true
 			file.content = error
 		}
 	)
+	//var getAllFiles = getFiles($input.value, files)
+	
 	
 	// submit
 	$submit.onclick = function () {
@@ -70,39 +69,7 @@
 		$result.innerHTML = compile(file).compiledCode ? compile(file).compiledCode.replace(/</g, '&lt;').replace(/>/g, '&gt;') : compile(file).resultMessage
 	}
 	
-	// get files
-	function getFiles(path) {
-		var files = {} // object of files in format { 'name': { path: '', content: '', error: false, files: ['name', 'name'] } }
-		var name = path.match(/([^\\\/]+$)/)[0].trim() // gets the string from after the last `/` or `\` 'til the end of the file, trimmed
-		
-		files[name] = { path: path, content: '', error: null }
-		
-		var master = getFile(path).then(
-			  function (res) {
-				files[path] = { content: res }
-				findFilePaths(files[path].content)
-			}
-			, function (err) {
-				files[path] = { content: '',  error: err }
-			}
-		)
-		
-		function findFilePaths(fileContent) {
-			var components = fileContent.match(/(<!--[\t \r\n]@import[\t \r\n=:].*-->)|(<!--[\t \r\n]@include[\t \r\n=:].*-->)/g)
-			for (var i = 0; i < components.length; i++) {
-				var component    = components[i]
-				var commentStart = component.indexOf('<!--')
-				var comment      = ''
-				
-				if (~commentStart) { // this component contains a comment
-					comment += component.substring(commentStart) // comment is the component from `<!--` on
-					if (/@import|@include/.test(comment)) { // presense of these indicates there is a new file to get
-						
-					}
-				}
-			}
-		}
-	}
+	// get file
 	function getFile(path) {
 		return new Promise(function (resolve, reject) {
 			var request = new XMLHttpRequest()
@@ -119,6 +86,54 @@
 			request.send()
 		})
 	}
+	
+	//
+	// separate get files way of doing it (using some of the same stuff
+	//
+	var files = {}
+	
+	// get files
+/*
+	function getFiles(path, files) {
+		
+		var File = function (file) {
+			this.content = file && file.content || ''
+			this.error   = file && file.error || null
+		}
+		
+		if (!files) files = {} // object of files in format { 'path': { content: '', error: false } }
+		//var name = path.match(/([^\\\/]+$)/)[0].trim() // gets the string from after the last `/` or `\` 'til the end of the file, trimmed
+		
+		files[path] = new File() // add the main file to files
+		
+		var master = getFile(path).then(
+			  function (res) {
+				files[path] = { content: res }
+				findFilePaths(files[path].content, files)
+			}
+			, function (err) {
+				files[path] = { content: '',  error: err }
+				console.error(err)
+			}
+		)
+		
+		function findFilePaths(fileContent, files) {
+			var includes = fileContent.match(/(<!--[\t \r\n]@import[\t \r\n=:].*-->)|(<!--[\t \r\n]@include[\t \r\n=:].*-->)/g)
+			for (var i = 0; i < includes.length; i++) {
+				var paths = includes[i]
+					.split(/@import|@include/g).pop() // gets everything after the @import or @include
+						.replace(/-->/g,'').trim()     // strips '-->' (which is the end, since we're just grabbing the comment itself
+						.split(',')                    // splits the remaining string into an array of filenamse
+				
+				for (var j = 0; j < paths.length; j++) {
+					files[paths[j]] = { content: '', error: null }
+				}
+				
+				console.log(paths)
+			}
+		}
+	}
+*/
 </script>
 </div>
 
