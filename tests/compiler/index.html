@@ -44,9 +44,9 @@
 	
 	// the file
 	var file = {
-		  path     : $input.value
-		, contents : ''
-		, error    : false
+		  path    : $input.value
+		, content : ''
+		, error   : false
 	}
 	
 	var files = {}
@@ -54,19 +54,19 @@
 	// get the file
 	getFile($input.value).then(
 		  function (response) {
-			file.contents = response
+			file.content = response
 			$submit.onclick()
 			files = getFiles(file.path)
 		}
 		, function (error) {
 			file.error = true
-			file.contents = error
+			file.content = error
 		}
 	)
 	
 	// submit
 	$submit.onclick = function () {
-		$source.innerHTML = file.contents.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+		$source.innerHTML = file.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')
 		$result.innerHTML = compile(file).compiledCode ? compile(file).compiledCode.replace(/</g, '&lt;').replace(/>/g, '&gt;') : compile(file).resultMessage
 	}
 	

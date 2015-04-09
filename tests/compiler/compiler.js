@@ -15,10 +15,10 @@
 		var inputCode = ''            //! ln 193
 		var comps     = []            //! ln 203
 		
-		if (file.path && file.contents) {
+		if (file.path && file.content) {
 			var pathParts = file.path.split('/')
 			fileName = pathParts[pathParts.length - 1]
-			inputCode = file.contents
+			inputCode = file.content
 		}
 		
 		var compiledCode     = ''
