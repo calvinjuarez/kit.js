@@ -73,6 +73,10 @@
 	$submit.onclick = function () {
 		$source.innerHTML = file.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')
 		//$result.innerHTML = compile(file).compiledCode ? compile(file).compiledCode.replace(/</g, '&lt;').replace(/>/g, '&gt;') : compile(file).resultMessage
+		
+		$submit.innerHTML = 'Done'
+		$submit.className = 'btn btn-disabled disabled'
+		$submit.onclick = null
 	}
 	
 	// get file
