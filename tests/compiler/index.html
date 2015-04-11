@@ -23,6 +23,10 @@
 			</div>
 		</section>
 		<section class="col-sm-8 col-sm-offset-2">
+			<h2>Files Included</h2>
+			<ul id="files"></ul>
+		</section>
+		<section class="col-sm-8 col-sm-offset-2">
 			<h2>File Contents</h2>
 			<pre><output id="source"></output></pre>
 		</section>
@@ -41,6 +45,7 @@
 	var $submit = document.querySelector('#submit')
 	var $source = document.querySelector('#source')
 	var $result = document.querySelector('#result')
+	var $files  = document.querySelector('#files')
 	
 	// the file
 	var file = {
@@ -106,11 +111,15 @@
 		if (!promises) promises = {}
 		//var name = path.match(/([^\\\/]+$)/)[0].trim() // gets the string from after the last `/` or `\` 'til the end of the file, trimmed
 		
+		var li = document.createElement('li')
+		li.innerHTML = path
+		$files.appendChild(li)
+		
 		files[path] = new File()
 		promises[path] = getFile(path).then(
 			  function (response) {
 				files[path].content = response
-				findFilePaths(response, files, promises)
+				findFilePaths(path, response, files, promises)
 			}
 			, function (error) {
 				files[path].error = error
@@ -120,30 +129,45 @@
 		
 		return true
 		
-		function findFilePaths(fileContent, files, promises) {
-			var includes = fileContent.match(/(<!--[\t \r\n]@import[\t ].*-->)|(<!--[\t \r\n]@include[\t ].*-->)/g)
-			for (var i = 0; i < includes.length; i++) {
-				var paths = includes[i]
-					.split(/@import[\t \r\n=:]*|@include[\t \r\n=:]*/g).pop() // gets everything after the @import or @include
-						.replace(/-->/g,'').trim()                             // strips '-->' (which is the end, since we're just grabbing the comment itself
-						.split(',')                                            // splits the remaining string into an array of filenamse
-				
-				for (var j = 0; j < paths.length; j++)
-					if (paths[j]) {
-						var path = paths[j]
-						files[path] = new File()
-						promises[path] = getFile(path).then(
-							  function (response) {
-								files[path].content = response
-								findFilePaths(response, files, promises)
-							}
-							, function (error) {
-								files[path].error = error
-								console.error(error)
-							}
-						)
-					}
-			}
+		function findFilePaths(parent, fileContent, files, promises) {
+			
+			var includes = fileContent.match(/(<!--[\t ]*@import[\t ]+.*-->)|(<!--[\t ]*@include[\t ]+.*-->)/g)
+			var parentPath = parent.replace(/([^\/\\]+$)/, '').trim() // returns everything up to and including the last `/` (or `\`)
+			
+			// this bit needs some serious work
+			if (parent.indexOf('./') == 0 || parent.indexOf('.\\') == 0)
+				parentPath = parentPath.substring(2) // removes the first two characters, which are `.` and `/` (or `\`)
+			if (parent.indexOf('../') == 0 || parent.indexOf('..\\') == 0)
+				parentPath = parentPath.replace(/([^\/\\]+\/$)/, '').trim() // removes the last compenent that ends with `/` (or `\`)
+			
+			if (includes.length > 0)
+				for (var i = 0; i < includes.length; i++) {
+					var paths = includes[i]
+						.split(/@import[\t ]*|@include[\t ]*/g).pop() // gets everything after the `@import` or `@include`
+						.replace(/-->/g,'').trim()                    // strips '-->' (which is the end, since we're just grabbing the comment itself
+						.split(',')                                   // splits the remaining string into an array of file paths
+					
+					for (var j = 0; j < paths.length; j++)
+						if (paths[j]) {
+							var path = parentPath + paths[j].trim()
+							
+							var li = document.createElement('li')
+							li.innerHTML = path
+							$files.appendChild(li)
+							
+							files[path] = new File()
+							promises[path] = getFile(path).then(
+								  function (response) {
+									files[path].content = response
+									findFilePaths(path, response, files, promises)
+								}
+								, function (error) {
+									files[path].error = error
+									console.error(error)
+								}
+							)
+						}
+				}
 			
 		}
 	}
