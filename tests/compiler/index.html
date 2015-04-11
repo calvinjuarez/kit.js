@@ -27,13 +27,15 @@
 			<ul id="files"></ul>
 		</section>
 		<section class="col-sm-8 col-sm-offset-2">
-			<h2>File Contents</h2>
+			<h2>Main File Contents</h2>
 			<pre><output id="source"></output></pre>
 		</section>
+<!--
 		<section class="col-sm-8 col-sm-offset-2">
 			<h2>Compiler Result</h2>
 			<pre><output id="result"></output></pre>
 		</section>
+-->
 	</div>
 </div>
 	
@@ -44,7 +46,7 @@
 	var $input  = document.querySelector('#input')
 	var $submit = document.querySelector('#submit')
 	var $source = document.querySelector('#source')
-	var $result = document.querySelector('#result')
+	//var $result = document.querySelector('#result')
 	var $files  = document.querySelector('#files')
 	
 	// the file
@@ -70,7 +72,7 @@
 	// submit
 	$submit.onclick = function () {
 		$source.innerHTML = file.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')
-		$result.innerHTML = compile(file).compiledCode ? compile(file).compiledCode.replace(/</g, '&lt;').replace(/>/g, '&gt;') : compile(file).resultMessage
+		//$result.innerHTML = compile(file).compiledCode ? compile(file).compiledCode.replace(/</g, '&lt;').replace(/>/g, '&gt;') : compile(file).resultMessage
 	}
 	
 	// get file
