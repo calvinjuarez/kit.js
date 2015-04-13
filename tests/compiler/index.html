@@ -13,6 +13,9 @@
 
 <div class="container-fluid">
 	<div class="row">
+		<header class="col-sm-8 col-sm-offset-2">
+			<h1>Compiler Test</h1>
+		</header>
 		<section class="col-sm-4 col-sm-offset-2">
 			<h2>Main File Path</h2>
 			<div class="input-group">
@@ -75,7 +78,7 @@
 		//$result.innerHTML = compile(file).compiledCode ? compile(file).compiledCode.replace(/</g, '&lt;').replace(/>/g, '&gt;') : compile(file).resultMessage
 		
 		$submit.innerHTML = 'Done'
-		$submit.className = 'btn btn-disabled disabled'
+		$submit.className = 'btn btn-disabled'
 		$submit.onclick = null
 	}
 	
@@ -98,7 +101,7 @@
 	}
 	
 	//
-	// separate get files way of doing it (using some of the same stuff
+	// Separate, get files way of doing it (using some of the same stuff)
 	//
 	var files = {}
 	var promises = {}
